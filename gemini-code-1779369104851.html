@@ -1,0 +1,884 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scout Attack // Team Cat Attack</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=Inter:wght@400;500;600&display=swap');
+
+        :root {
+            --bg-main: #050506;
+            --bg-card: #0d0d11;
+            --bg-input: #141419;
+            --bg-input-focus: #1c1c24;
+            --cat-red: #ff1a1a;
+            --cat-red-glow: rgba(255, 26, 26, 0.15);
+            --text-primary: #ffffff;
+            --text-secondary: #8e8e9f;
+            --border-color: #22222a;
+            --border-focus: #3a3a4a;
+            --success: #00ff88;
+            --danger: #ff1a1a;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-primary);
+            margin: 0;
+            padding: 24px 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            letter-spacing: -0.01em;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 480px;
+        }
+
+        .brand-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            padding: 0 4px;
+        }
+
+        .brand-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin: 0;
+            background: linear-gradient(135deg, #ffffff 30%, var(--cat-red) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .badge-team {
+            font-family: 'Space Grotesk', sans-serif;
+            background: var(--cat-red-glow);
+            color: var(--cat-red);
+            border: 1px solid var(--cat-red);
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+        }
+
+        /* Auth Gate Screens */
+        .auth-screen {
+            display: none;
+            margin-top: 40px;
+        }
+        .auth-screen.active {
+            display: block;
+        }
+
+        .auth-toggle-text {
+            text-align: center;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-top: 16px;
+            cursor: pointer;
+        }
+        .auth-toggle-text span {
+            color: var(--cat-red);
+            text-decoration: underline;
+        }
+
+        /* Main App Interface Wrapper */
+        #mainAppInterface {
+            display: none;
+        }
+
+        /* Navigation Tab Bar */
+        .tab-bar {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            padding: 4px;
+            border-radius: 12px;
+            margin-bottom: 24px;
+        }
+
+        .tab-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            padding: 12px;
+            border-radius: 8px;
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 0.05em;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .tab-btn.active {
+            background: var(--bg-input-focus);
+            color: var(--cat-red);
+            border: 1px solid rgba(255, 26, 26, 0.2);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+
+        .view-panel { display: none; }
+        .view-panel.active { display: block; }
+
+        .tide-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+        }
+
+        .card-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-secondary);
+            margin-top: 0;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .card-title::before {
+            content: '';
+            display: inline-block;
+            width: 4px;
+            height: 14px;
+            background: var(--cat-red);
+            border-radius: 2px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+        .form-row .form-group { margin-bottom: 0; }
+
+        label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-secondary);
+        }
+
+        input[type="number"], input[type="text"], input[type="password"], select, textarea {
+            background: var(--bg-input);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            padding: 14px;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.2s ease;
+            box-sizing: border-box;
+            width: 100%;
+            font-family: inherit;
+        }
+
+        input[type="number"], input[type="text"], input[type="password"] {
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 600;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--cat-red);
+            background: var(--bg-input-focus);
+            box-shadow: 0 0 12px var(--cat-red-glow);
+        }
+
+        .counter-widget {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: var(--bg-input);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 6px;
+        }
+
+        .counter-btn {
+            background: #1c1c24;
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+            width: 44px;
+            height: 44px;
+            border-radius: 8px;
+            font-size: 1.25rem;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .counter-btn:active {
+            transform: scale(0.92);
+            background: var(--cat-red);
+            border-color: var(--cat-red);
+        }
+
+        .counter-val {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.35rem;
+            font-weight: 700;
+            width: 40px;
+            text-align: center;
+        }
+
+        .toggle-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 14px;
+            background: var(--bg-input);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            cursor: pointer;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 44px;
+            height: 24px;
+        }
+
+        .switch input { opacity: 0; width: 0; height: 0; }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #22222a;
+            transition: .3s;
+            border-radius: 24px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px; width: 18px;
+            left: 3px; bottom: 3px;
+            background-color: white;
+            transition: .3s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider { background-color: var(--cat-red); }
+        input:checked + .slider:before { transform: translateX(20px); }
+
+        .btn-primary {
+            width: 100%;
+            background: var(--cat-red);
+            color: var(--text-primary);
+            border: none;
+            padding: 16px;
+            border-radius: 12px;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 20px var(--cat-red-glow);
+            margin-top: 10px;
+        }
+
+        .btn-primary:hover { background: #ff4040; }
+
+        .action-cluster {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .btn-secondary {
+            background: var(--bg-card);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+            padding: 12px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+        }
+
+        .btn-secondary:hover { border-color: var(--border-focus); background: #141419; }
+        .btn-danger { background: rgba(255, 26, 26, 0.1); color: var(--danger); border: 1px solid rgba(255, 26, 26, 0.2); }
+        .btn-danger:hover { background: rgba(255, 26, 26, 0.2); }
+
+        .table-container { width: 100%; overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+        th { font-family: 'Space Grotesk', sans-serif; text-transform: uppercase; font-size: 0.7rem; color: var(--text-secondary); padding: 12px 6px; text-align: left; border-bottom: 1px solid var(--border-color); }
+        td { padding: 12px 6px; border-bottom: 1px solid var(--border-color); font-weight: 500; }
+        tr:last-child td { border-bottom: none; }
+        .accent-td { font-family: 'Space Grotesk', sans-serif; font-weight: 700; }
+        
+        .section-divider {
+            border: 0;
+            height: 1px;
+            background: var(--border-color);
+            margin: 24px 0;
+        }
+
+        .user-statusbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-bottom: 16px;
+            padding: 0 4px;
+        }
+        .logout-link {
+            color: var(--cat-red);
+            cursor: pointer;
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    
+    <div class="brand-header">
+        <h1 class="brand-title">Scout Attack</h1>
+        <span class="badge-team">CAT ATTACK</span>
+    </div>
+
+    <div id="passkeyGate" class="auth-screen active">
+        <div class="tide-card">
+            <div class="card-title">Security Initialization</div>
+            <form id="passkeyForm">
+                <div class="form-group">
+                    <label>Enter Team Passkey</label>
+                    <input type="password" id="teamPasskeyField" required placeholder="••••••">
+                </div>
+                <button type="submit" class="btn-primary">Verify Subsystem</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="loginGate" class="auth-screen">
+        <div class="tide-card">
+            <div class="card-title">Account Authentication</div>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label>Username</label>
+                    <input type="text" id="loginUser" required placeholder="scout_alpha">
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="loginPass" required placeholder="••••••••">
+                </div>
+                <button type="submit" class="btn-primary">Sign In</button>
+            </form>
+            <p class="auth-toggle-text">New user? <span onclick="showAuthScreen('registerGate')">Create an account</span></p>
+        </div>
+    </div>
+
+    <div id="registerGate" class="auth-screen">
+        <div class="tide-card">
+            <div class="card-title">Enlist New Scout</div>
+            <form id="registerForm">
+                <div class="form-group">
+                    <label>Create Username</label>
+                    <input type="text" id="regUser" required placeholder="cat_scout_01">
+                </div>
+                <div class="form-group">
+                    <label>Create Password</label>
+                    <input type="password" id="regPass" required placeholder="••••••••">
+                </div>
+                <button type="submit" class="btn-primary">Register Identity</button>
+            </form>
+            <p class="auth-toggle-text">Existing profile? <span onclick="showAuthScreen('loginGate')">Return to login</span></p>
+        </div>
+    </div>
+
+
+    <div id="mainAppInterface">
+        
+        <div class="user-statusbar">
+            <span>Operator: <strong id="currentUserDisplay" style="color:white;">None</strong></span>
+            <span class="logout-link" onclick="logoutSystem()">Lock Terminal</span>
+        </div>
+
+        <div class="tab-bar">
+            <button class="tab-btn active" onclick="switchTab('matchView', this)">Match Scout</button>
+            <button class="tab-btn" onclick="switchTab('pitView', this)">Pit Scout</button>
+        </div>
+
+        <div id="matchView" class="view-panel active">
+            <div class="tide-card">
+                <form id="scoutForm">
+                    <div class="card-title">Match Setup</div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Match #</label>
+                            <input type="number" id="matchNum" required min="1" placeholder="00">
+                        </div>
+                        <div class="form-group">
+                            <label>Team #</label>
+                            <input type="number" id="teamNum" required min="1" placeholder="0000">
+                        </div>
+                    </div>
+
+                    <hr class="section-divider">
+
+                    <div class="card-title">Autonomous Period</div>
+                    <div class="form-group">
+                        <label class="toggle-container">
+                            <span style="color: var(--text-primary); font-size: 0.9rem; font-weight: 500;">Exited Taxi Zone</span>
+                            <div class="switch">
+                                <input type="checkbox" id="autoLeave">
+                                <span class="slider"></span>
+                            </div>
+                        </label>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Auto High Hub Fuel</label>
+                            <div class="counter-widget">
+                                <button type="button" class="counter-btn" onclick="changeVal('autoHigh', -1)">-</button>
+                                <span id="autoHighVal" class="counter-val">0</span>
+                                <button type="button" class="counter-btn" onclick="changeVal('autoHigh', 1)">+</button>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Auto Low Hub Fuel</label>
+                            <div class="counter-widget">
+                                <button type="button" class="counter-btn" onclick="changeVal('autoLow', -1)">-</button>
+                                <span id="autoLowVal" class="counter-val">0</span>
+                                <button type="button" class="counter-btn" onclick="changeVal('autoLow', 1)">+</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr class="section-divider">
+
+                    <div class="card-title">Teleop Period (Hub Funnel Matrix)</div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Teleop High Hub</label>
+                            <div class="counter-widget">
+                                <button type="button" class="counter-btn" onclick="changeVal('teleHigh', -1)">-</button>
+                                <span id="teleHighVal" class="counter-val">0</span>
+                                <button type="button" class="counter-btn" onclick="changeVal('teleHigh', 1)">+</button>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Teleop Low Hub</label>
+                            <div class="counter-widget">
+                                <button type="button" class="counter-btn" onclick="changeVal('teleLow', -1)">-</button>
+                                <span id="teleLowVal" class="counter-val">0</span>
+                                <button type="button" class="counter-btn" onclick="changeVal('teleLow', 1)">+</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr class="section-divider">
+
+                    <div class="card-title">Endgame & Obstacles</div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Tower Climb State</label>
+                            <select id="endgame">
+                                <option value="None">None / Parked Floor</option>
+                                <option value="Low Tower">Low Tower Rung</option>
+                                <option value="High Tower">High Tower Rung</option>
+                                <option value="Failed">Failed Climb Attempt</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Obstacle Clearing</label>
+                            <select id="pitDriveAbility">
+                                <option value="Flawless">Crosses Fields Easily</option>
+                                <option value="Slowly">Struggles / Slow Cross</option>
+                                <option value="Avoids">Avoids Field Obstacles</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group" style="grid-column: span 2;">
+                            <label>Robot Status</label>
+                            <select id="status">
+                                <option value="Operational">Normal Operational</option>
+                                <option value="Broke Down">Broke Down Mechanically</option>
+                                <option value="Disabled">Disabled / E-Stop</option>
+                                <option value="No Show">No Show</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Tactical Observations</label>
+                        <textarea id="notes" rows="2" placeholder="Intake efficiency, handling under defense, component issues..."></textarea>
+                    </div>
+
+                    <button type="submit" class="btn-primary">Commit Match Records</button>
+                </form>
+            </div>
+
+            <div class="action-cluster">
+                <button class="btn-secondary" onclick="exportMatchesCSV()">Export Matches (.CSV)</button>
+                <button class="btn-secondary btn-danger" onclick="clearData('matches')">Wipe</button>
+            </div>
+
+            <div class="tide-card">
+                <h2 class="card-title">REBUILT Match Ledger (<span id="matchCount" style="color: var(--cat-red);">0</span>)</h2>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>MATCH</th>
+                                <th>TEAM</th>
+                                <th>AUTO (H/L)</th>
+                                <th>TELE (H/L)</th>
+                                <th>CLIMB</th>
+                                <th>STAT</th>
+                            </tr>
+                        </thead>
+                        <tbody id="matchTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div id="pitView" class="view-panel">
+            <div class="tide-card">
+                <form id="pitForm">
+                    <div class="card-title">Robot Identity</div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Target Team #</label>
+                            <input type="number" id="pitTeamNum" required placeholder="0000">
+                        </div>
+                        <div class="form-group">
+                            <label>Drivetrain Config</label>
+                            <select id="pitDrive">
+                                <option value="Swerve">Swerve Drive</option>
+                                <option value="Tank Drive">Tank Drive (West Coast)</option>
+                                <option value="Mecanum">Mecanum / Omni</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <hr class="section-divider">
+
+                    <div class="card-title">Technical Specifications & Rules</div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Weight (lbs)</label>
+                            <input type="number" id="pitWeight" placeholder="120" min="1">
+                        </div>
+                        <div class="form-group">
+                            <label>Bumper Padding Type</label>
+                            <select id="pitBumper">
+                                <option value="Solid Foam Blocks">Solid Foam Blocks</option>
+                                <option value="EVA Tiles">Stacked EVA Floor Tiles</option>
+                                <option value="Solid Pool Noodles">Solid Pool Noodles</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Primary Fuel Scoring Target</label>
+                        <select id="pitPreference">
+                            <option value="High Hub">High Hub Funnel Specialized</option>
+                            <option value="Low Hub">Low Hub Dump Focus</option>
+                            <option value="Hybrid">Versatile / Both Targets</option>
+                            <option value="Defense">Heavy Counter Defense Bot</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Intake System Architecture</label>
+                        <select id="pitIntake">
+                            <option value="Ground Intake">Over-The-Bumper Ground Intake</option>
+                            <option value="Chute Only">Human Player Station Chute Only</option>
+                            <option value="Combined">Dual / Ground & Chute</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Pit Engineering & Maintenance Review</label>
+                        <textarea id="pitNotes" rows="3" placeholder="Assess build robustness, wiring security, tower latch geometry..."></textarea>
+                    </div>
+
+                    <button type="submit" class="btn-primary">Log Pit Analytics</button>
+                </form>
+            </div>
+
+            <div class="action-cluster">
+                <button class="btn-secondary" onclick="exportPitCSV()">Export Pit Data (.CSV)</button>
+                <button class="btn-secondary btn-danger" onclick="clearData('pit')">Wipe</button>
+            </div>
+
+            <div class="tide-card">
+                <h2 class="card-title">Scouted REBUILT Profiles (<span id="pitCount" style="color: var(--cat-red);">0</span>)</h2>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>TEAM</th>
+                                <th>DRIVE</th>
+                                <th>TARGET</th>
+                                <th>INTAKE</th>
+                                <th>SCOUT</th>
+                            </tr>
+                        </thead>
+                        <tbody id="pitTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    const TEAM_PASSKEY = "FRC451";
+    let currentUser = null;
+    
+    let usersDb = JSON.parse(localStorage.getItem('catScoutUsers')) || {};
+    let counters = { autoHigh: 0, autoLow: 0, teleHigh: 0, teleLow: 0 };
+    let matchData = JSON.parse(localStorage.getItem('catAttackMatchData')) || [];
+    let pitData = JSON.parse(localStorage.getItem('catAttackPitData')) || [];
+
+    function showAuthScreen(screenId) {
+        document.querySelectorAll('.auth-screen').forEach(scr => scr.classList.remove('active'));
+        document.getElementById('mainAppInterface').style.display = 'none';
+        document.getElementById(screenId).classList.add('active');
+    }
+
+    document.getElementById('passkeyForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const inputKey = document.getElementById('teamPasskeyField').value;
+        if(inputKey === TEAM_PASSKEY) {
+            document.getElementById('teamPasskeyField').value = '';
+            showAuthScreen('loginGate');
+        } else {
+            alert("INCORRECT SECURITY KEY.");
+        }
+    });
+
+    document.getElementById('registerForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const username = document.getElementById('regUser').value.trim().toLowerCase();
+        const password = document.getElementById('regPass').value;
+
+        if (usersDb[username]) {
+            return alert("Username already registered!");
+        }
+
+        usersDb[username] = password;
+        localStorage.setItem('catScoutUsers', JSON.stringify(usersDb));
+        
+        document.getElementById('registerForm').reset();
+        alert("Account registered! Please sign in.");
+        showAuthScreen('loginGate');
+    });
+
+    document.getElementById('loginForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const username = document.getElementById('loginUser').value.trim().toLowerCase();
+        const password = document.getElementById('loginPass').value;
+
+        if (usersDb[username] && usersDb[username] === password) {
+            currentUser = username;
+            document.getElementById('currentUserDisplay').innerText = username.toUpperCase();
+            
+            document.querySelectorAll('.auth-screen').forEach(scr => scr.classList.remove('active'));
+            document.getElementById('mainAppInterface').style.display = 'block';
+            
+            document.getElementById('loginForm').reset();
+            renderTables();
+        } else {
+            alert("Invalid account credentials.");
+        }
+    });
+
+    function logoutSystem() {
+        currentUser = null;
+        document.getElementById('mainAppInterface').style.display = 'none';
+        showAuthScreen('passkeyGate');
+    }
+
+    function switchTab(viewId, element) {
+        document.querySelectorAll('.view-panel').forEach(view => view.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+        
+        document.getElementById(viewId).classList.add('active');
+        element.classList.add('active');
+    }
+
+    function changeVal(key, amount) {
+        counters[key] = Math.max(0, counters[key] + amount);
+        document.getElementById(key + 'Val').innerText = counters[key];
+    }
+
+    function renderTables() {
+        const matchBody = document.getElementById('matchTableBody');
+        document.getElementById('matchCount').innerText = matchData.length;
+        matchBody.innerHTML = '';
+        
+        matchData.forEach(entry => {
+            const row = document.createElement('tr');
+            let statusColor = entry.status !== 'Operational' ? 'var(--danger)' : 'var(--text-primary)';
+            let climbColor = (entry.endgame.includes('Tower')) ? 'var(--success)' : (entry.endgame === 'Failed' ? 'var(--danger)' : 'var(--text-secondary)');
+            row.innerHTML = `
+                <td class="accent-td" style="color: var(--text-secondary);">Q${entry.matchNum}</td>
+                <td class="accent-td" style="color: var(--cat-red);">${entry.teamNum}</td>
+                <td>${entry.autoLeave ? 'T ' : ''}(${entry.autoHigh}/${entry.autoLow})</td>
+                <td>(${entry.teleHigh}/${entry.teleLow})</td>
+                <td style="color: ${climbColor}; font-size:0.75rem;">${entry.endgame.toUpperCase()}</td>
+                <td style="color: ${statusColor}; font-size:0.75rem;">${entry.status.toUpperCase()}</td>
+            `;
+            matchBody.appendChild(row);
+        });
+
+        const pitBody = document.getElementById('pitTableBody');
+        document.getElementById('pitCount').innerText = pitData.length;
+        pitBody.innerHTML = '';
+
+        pitData.forEach(entry => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td class="accent-td" style="color: var(--cat-red);">${entry.teamNum}</td>
+                <td>${entry.driveType}</td>
+                <td style="font-size:0.75rem; color: var(--text-secondary);">${entry.preference.toUpperCase()}</td>
+                <td style="font-size:0.75rem;">${entry.intakeType.toUpperCase()}</td>
+                <td style="font-size:0.8rem; color: var(--text-secondary);">${(entry.scoutId || 'SYSTEM').toUpperCase()}</td>
+            `;
+            pitBody.appendChild(row);
+        });
+    }
+
+    document.getElementById('scoutForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const newEntry = {
+            matchNum: document.getElementById('matchNum').value,
+            teamNum: document.getElementById('teamNum').value,
+            autoLeave: document.getElementById('autoLeave').checked,
+            autoHigh: counters.autoHigh,
+            autoLow: counters.autoLow,
+            teleHigh: counters.teleHigh,
+            teleLow: counters.teleLow,
+            endgame: document.getElementById('endgame').value,
+            obstacleClearing: document.getElementById('pitDriveAbility').value,
+            status: document.getElementById('status').value,
+            notes: document.getElementById('notes').value.replace(/,/g, ';'),
+            scoutId: currentUser
+        };
+
+        matchData.push(newEntry);
+        localStorage.setItem('catAttackMatchData', JSON.stringify(matchData));
+        
+        document.getElementById('scoutForm').reset();
+        for (let key in counters) {
+            counters[key] = 0;
+            document.getElementById(key + 'Val').innerText = '0';
+        }
+        
+        renderTables();
+    });
+
+    document.getElementById('pitForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        const newPitEntry = {
+            teamNum: document.getElementById('pitTeamNum').value,
+            driveType: document.getElementById('pitDrive').value,
+            weight: document.getElementById('pitWeight').value,
+            bumperPadding: document.getElementById('pitBumper').value,
+            preference: document.getElementById('pitPreference').value,
+            intakeType: document.getElementById('pitIntake').value,
+            notes: document.getElementById('pitNotes').value.replace(/,/g, ';'),
+            scoutId: currentUser
+        };
+
+        pitData = pitData.filter(p => p.teamNum !== newPitEntry.teamNum);
+        pitData.push(newPitEntry);
+        localStorage.setItem('catAttackPitData', JSON.stringify(pitData));
+
+        document.getElementById('pitForm').reset();
+        renderTables();
+        alert(`Team ${newPitEntry.teamNum} REBUILT profile saved.`);
+    });
+
+    function exportMatchesCSV() {
+        if(matchData.length === 0) return alert("No match telemetry available.");
+        let csvContent = "data:text/csv;charset=utf-8,Match,Team,Auto Taxi,Auto High Hub,Auto Low Hub,Teleop High Hub,Teleop Low Hub,Tower Climb,Obstacle Handling,Status,Scout,Notes\n";
+        matchData.forEach(r => {
+            csvContent += `${r.matchNum},${r.teamNum},${r.autoLeave},${r.autoHigh},${r.autoLow},${r.teleHigh},${r.teleLow},${r.endgame},${r.obstacleClearing},${r.status},${r.scoutId},${r.notes}\n`;
+        });
+        downloadCSV(csvContent, "rebuilt_matches.csv");
+    }
+
+    function exportPitCSV() {
+        if(pitData.length === 0) return alert("No pit data saved.");
+        let csvContent = "data:text/csv;charset=utf-8,Team,Drive Type,Weight (lbs),Bumper Padding,Target Strategy,Intake Style,Scout,Notes\n";
+        pitData.forEach(r => {
+            csvContent += `${r.teamNum},${r.driveType},${r.weight},${r.bumperPadding},${r.preference},${r.intakeType},${r.scoutId},${r.notes}\n`;
+        });
+        downloadCSV(csvContent, "rebuilt_pits.csv");
+    }
+
+    function downloadCSV(content, filename) {
+        const encodedUri = encodeURI(content);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", filename);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+
+    function clearData(target) {
+        if(confirm(`Wipe total storage for ${target.toUpperCase()} matrix records?`)) {
+            if (target === 'matches') {
+                matchData = [];
+                localStorage.removeItem('catAttackMatchData');
+            } else {
+                pitData = [];
+                localStorage.removeItem('catAttackPitData');
+            }
+            renderTables();
+        }
+    }
+</script>
+
+</body>
+</html>
